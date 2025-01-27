@@ -132,6 +132,7 @@ class Despesa
   public decimal Valor { get; set; }
   public decimal Valor { get; set; }
 
+
     // Construtor da classe para inicializar os objetos Despesa
     public Despesa(string data, string tipo, string categoria, string status, decimal valor)
     {
