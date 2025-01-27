@@ -1,0 +1,145 @@
+// Importa os namespaces necessários para utilizar funcionalidades como: 
+// - System: Funcionalidades básicas do .NET Framework 
+// - System.Collections.Generic: Listas, dicionários e outras coleções genéricas 
+// - System.Linq: Operadores de consulta para realizar consultas em coleções
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+class Program
+{
+    static void Main()
+    {
+       // Cria uma lista de objetos "Despesa" para simular os dados
+        var despesas = new List<Despesa>
+        {
+            // Adiciona várias despesas à lista com seus respectivos dados
+            new Despesa("2024-12-01", "Entrada", "Salário", "Recebido", 5000),
+            new Despesa("2024-12-02", "Saída", "Eletrônicos", "Pago", 3000),
+            new Despesa("2024-12-03", "Saída", "Alimentação", "Pendente", 1600),
+            new Despesa("2024-12-04", "Saída", "Vestuário", "Pago", 1500),
+            new Despesa("2024-12-05", "Saída", "Serviços", "Pago", 1400),
+            new Despesa("2024-12-06", "Saída", "Viagem", "Pendente", 1250),
+            new Despesa("2024-12-07", "Saída", "Educação", "Pago", 1100),
+            new Despesa("2024-12-08", "Saída", "Saúde", "Pago", 970),
+            new Despesa("2024-12-09", "Entrada", "Freelance", "Recebido", 3000),
+            new Despesa("2024-12-10", "Saída", "Transporte", "Pago", 800)
+        };
+        // Exibe um menu de opções para o usuário
+        Console.WriteLine("==== DASHBOARD ====");
+        Console.WriteLine("1. Mostrar maiores gastos por categoria");
+        Console.WriteLine("2. Mostrar receitas separadas por mês");
+        Console.WriteLine("3. Selecionar dados por categoria, mês e ano");
+        Console.WriteLine("Escolha uma opção (1-3):");
+
+        // Lê a opção escolhida pelo usuário
+        int opcao = int.Parse(Console.ReadLine());
+        // Estrutura de decisão (switch-case) para executar a ação correspondente à opção escolhida
+        switch (opcao)
+        {
+            case 1:
+                MostrarMaioresGastos(despesas);
+                break;
+            case 2:
+                MostrarReceitasPorMes(despesas);
+                break;
+            case 3:
+                SelecionarDados(despesas);
+                break;
+            default:
+                Console.WriteLine("Opção inválida.");
+                break;
+        }
+    }
+
+    // Método para mostrar os maiores gastos por categoria
+    static void MostrarMaioresGastos(List<Despesa> despesas)
+    {
+        // Utiliza LINQ para agrupar as despesas por categoria, calcular o total de cada grupo e ordenar em ordem decrescente
+        var gastosPorCategoria = despesas
+            .Where(d => d.Tipo == "Saída") // Filtra apenas as despesas do tipo "Saída"
+            .GroupBy(d => d.Categoria) // Agrupa as despesas por categoria
+            .Select(g => new { Categoria = g.Key, Total = g.Sum(d => d.Valor) }) // Cria um novo objeto com a categoria e o total
+            .OrderByDescending(g => g.Total); // Ordena os resultados pelo total em ordem decrescente
+
+        // Exibe os resultados formatados
+        Console.WriteLine("\nMaiores Gastos por Categoria:");
+        Console.WriteLine("{0,-20} {1,10}", "Categoria", "Total (R$)");
+        Console.WriteLine(new string('-', 35));
+
+        foreach (var item in gastosPorCategoria)
+        {
+            Console.WriteLine("{0,-20} {1,10:N2}", item.Categoria, item.Total);
+        }
+    }
+
+    static void MostrarReceitasPorMes(List<Despesa> despesas)
+    {
+        var receitasPorMes = despesas
+            .Where(d => d.Tipo == "Entrada")
+            .GroupBy(d => new { Ano = DateTime.Parse(d.Data).Year, Mes = DateTime.Parse(d.Data).Month })
+            .Select(g => new { g.Key.Ano, g.Key.Mes, Total = g.Sum(d => d.Valor) });
+
+        Console.WriteLine("\nReceitas por Mês:");
+        Console.WriteLine("{0,-10} {1,-5} {2,10}", "Ano", "Mês", "Total (R$)");
+        Console.WriteLine(new string('-', 30));
+
+        foreach (var item in receitasPorMes)
+        {
+            Console.WriteLine("{0,-10} {1,-5} {2,10:N2}", item.Ano, item.Mes, item.Total);
+        }
+    }
+
+    static void SelecionarDados(List<Despesa> despesas)
+    {
+        Console.WriteLine("\nDigite o ano (exemplo: 2024):");
+        int ano = int.Parse(Console.ReadLine());
+
+        Console.WriteLine("Digite o mês (1-12):");
+        int mes = int.Parse(Console.ReadLine());
+
+        Console.WriteLine("Digite a categoria (ou deixe em branco para todas):");
+        string categoria = Console.ReadLine();
+
+        var dadosFiltrados = despesas
+            .Where(d =>
+                DateTime.Parse(d.Data).Year == ano &&
+                DateTime.Parse(d.Data).Month == mes &&
+                (string.IsNullOrEmpty(categoria) || d.Categoria.Equals(categoria, StringComparison.OrdinalIgnoreCase)));
+
+        Console.WriteLine("\nDados Selecionados:");
+        Console.WriteLine("{0,-15} {1,-10} {2,-20} {3,-10} {4,10}", "Data", "Tipo", "Categoria", "Status", "Valor (R$)");
+        Console.WriteLine(new string('-', 70));
+
+        foreach (var item in dadosFiltrados)
+        {
+            Console.WriteLine("{0,-15} {1,-10} {2,-20} {3,-10} {4,10:N2}", 
+                item.Data, item.Tipo, item.Categoria, item.Status, item.Valor);
+        }
+    }
+}
+
+// Classe representando uma despesa
+class Despesa
+{
+  // Propriedades da classe Despesa
+  public string Data { get; set; }
+  public DateTime DataConvertida { get; }
+  public string Tipo { get; set; }
+  public string Categoria { get; set; }
+  public string Status { get; set; }
+  public decimal Valor { get; set; }
+  public decimal Valor { get; set; }
+
+    // Construtor da classe para inicializar os objetos Despesa
+    public Despesa(string data, string tipo, string categoria, string status, decimal valor)
+    {
+        / / Atribui os valores dos parâmetros aos atributos da classe
+        Data = data;
+        Tipo = tipo;
+        Categoria = categoria;
+        Status = status;
+        Valor = valor;
+    }
+}
